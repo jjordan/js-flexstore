@@ -1,0 +1,836 @@
+<html>
+
+<head>
+<title>FlexStore Cookie Store Tests</title>
+<script language="JavaScript" src="/tests/jsunit/app/jsUnitCore.js"></script>
+<script language="JavaScript" src="/js/flexstore.js"></script>
+<script language="JavaScript">
+
+function setUp(){
+    // erase the store cookie, so as not to contaminate the tests.
+	var store_name = 'my store';
+	eraseCookie(store_name);
+	assertFalse(document.cookie.indexOf(store_name, 0) > -1);
+}
+
+function tearDown(){
+	var store_name = 'my store';
+	eraseCookie(store_name);
+}
+
+// Test that a cookie with the given store-name is created.
+function testCookieStoreCreatesCookie(){
+	var cookies_ok = cookiesEnabled();
+	if(cookies_ok == true){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert(document.cookie.indexOf(store_name, 0) > -1);
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+//Test storing to a cookie
+function testCookieStoreStoresValueInCookie(){
+	if(cookiesEnabled()){
+		// so we not only want to test that the
+		// key and value are stored in the cookie,
+		// but also that they are escaped.
+		var key = 'my key';
+		var value = 'my value';
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem(key, value);
+		var unescaped_value = new String(unescape(readCookie(store_name)));
+		debug("unescaped cookie value: ", unescaped_value);
+		var key_value_ar = unescaped_value.split('=');
+		assert('The first return value should be the key',unescape(key_value_ar[0]) == key);
+		assert('The second return value should be the value', unescape(key_value_ar[1]) == value);
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+// Test for adding 2 key/value pairs
+function testCookieStoreStoresTwoValuesInCookie(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'my key';
+		var value1 = 'my value';
+		var key2 = 'my other key';
+		var value2 = 'my other value';
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);		
+		var unescaped_value = new String(unescape(readCookie(store_name)));
+		debug("unescaped cookie value: ", unescaped_value);
+		var key_pairs_array = unescaped_value.split('&');
+		var key_value_ar1 = key_pairs_array[0].split('=');
+		var key_value_ar2 = key_pairs_array[1].split('=');
+
+		assert('First pair key',unescape(key_value_ar1[0])  == key1);
+		assert('First pair value', unescape(key_value_ar1[1])  == value1);
+		assert('Second pair key',unescape(key_value_ar2[0]) == key2);
+		assert('Second pair value', unescape(key_value_ar2[1]) == value2);
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+// Test for adding 3 key/value pairs 
+function testCookieStoreStoresMultipleValuesInCookie(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'my key';
+		var value1 = 'my value';
+		var key2 = 'my other key';
+		var value2 = 'my other value';
+		var key3 = 'super key';
+		var value3 = 'mild-mannered value';
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+		fs.setItem(key3, value3);
+		var unescaped_value = new String(unescape(readCookie(store_name)));
+		debug("unescaped cookie value: ", unescaped_value);
+		var key_pairs_array = unescaped_value.split('&');
+		var key_value_ar1 = key_pairs_array[0].split('=');
+		var key_value_ar2 = key_pairs_array[1].split('=');
+		var key_value_ar3 = key_pairs_array[2].split('=');
+
+		assert('First pair key',unescape(key_value_ar1[0])  == key1);
+		assert('First pair value',unescape(key_value_ar1[1])  == value1);
+		assert('Second pair key',unescape(key_value_ar2[0]) == key2);
+		assert('Second pair value',unescape(key_value_ar2[1]) == value2);
+		assert('Third pair key',unescape(key_value_ar3[0]) == key3);
+		assert('Third pair value',unescape(key_value_ar3[1]) == value3);
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+// Test overwriting key values
+function testCookieStoreStoresOverwritesValuesInCookie(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'my key';
+		var value1 = 'my value';
+		var key2 = 'my other key';
+		var value2 = 'my other value';
+		var key3 = 'super key';
+		var value3 = 'mild-mannered value';
+
+		var new_value1 = '';
+		var new_value2 = '';
+		var new_value3 = '';
+
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+		fs.setItem(key3, value3);
+
+		fs.setItem(key1, new_value1);
+		fs.setItem(key2, new_value2);
+		fs.setItem(key3, new_value3);
+
+		var unescaped_value = new String(unescape(readCookie(store_name)));
+		debug("unescaped cookie value: ", unescaped_value);
+		var key_pairs_array = unescaped_value.split('&');
+		var key_value_ar1 = key_pairs_array[0].split('=');
+		var key_value_ar2 = key_pairs_array[1].split('=');
+		var key_value_ar3 = key_pairs_array[2].split('=');
+
+		assert('First pair key',unescape(key_value_ar1[0])  == key1);
+		assert('First pair value',unescape(key_value_ar1[1])  == new_value1);
+		assert('Second pair key',unescape(key_value_ar2[0]) == key2);
+		assert('Second pair value',unescape(key_value_ar2[1]) == new_value2);
+		assert('Third pair key',unescape(key_value_ar3[0]) == key3);
+		assert('Third pair value',unescape(key_value_ar3[1]) == new_value3);
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+//Test getting from a cookie
+//Test getting from an empty cookie
+function testCookieStoreGetsValueFromEmptyCookie(){
+	if(cookiesEnabled()){
+		var key = 'my key';
+
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var value = fs.getItem(key);
+		assert('The value gotten should be null', value == null);
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+//Test getting from a cookie with one key/value pair
+function testCookieStoreGetsValueFromCookieWithOnePair(){
+	if(cookiesEnabled()){
+		var key1 = 'my key';
+		var value1 = 'my value';
+		var key2 = 'my other key';
+
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem(key1, value1);
+		var gotten_value1 = fs.getItem(key1);
+		var gotten_value2 = fs.getItem(key2);
+		assert('The First value gotten should be a real value', gotten_value1 == value1);
+		assert('The Second value gotten should be null', gotten_value2 == null);
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+//Test getting from a cookie with more than one key/value pair
+function testCookieStoreGetsValueFromCookieWithMultiplePairs(){
+	if(cookiesEnabled()){
+		var key1 = 'my key';
+		var value1 = 'my value';
+		var key2 = 'my other key';
+		var value2 = '';
+		var key3 = 'The third key';
+
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+		var gotten_value1 = fs.getItem(key1);
+		var gotten_value2 = fs.getItem(key2);
+		var gotten_value3 = fs.getItem(key3);
+		assert('The First value gotten should be a real value', gotten_value1 == value1);
+		assert('The Second value gotten should be a real value', gotten_value2 == value2);
+		assert('The Third value gotten should be null', gotten_value3 == null);
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+//Test getting and setting multiple values
+function testCookieStoreGetsValueFromCookieWithChangingValues(){
+	if(cookiesEnabled()){
+
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'first key';
+		var value1 = 'initial value';
+		var key2 = 'second key';
+		var value2 = 'initial value 2';
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+		var gotten_value1 = fs.getItem(key1);
+		var gotten_value2 = fs.getItem(key2);
+		assert('The First value gotten should be a real value', gotten_value1 == value1);
+		assert('The Second value gotten should be a real value', gotten_value2 == value2);
+		var new_value1 = 'new value1';
+		var new_value2 = 'new value2';
+		fs.setItem(key1, new_value1);
+		fs.setItem(key2, new_value2);
+		var gotten_value1 = fs.getItem(key1);
+		var gotten_value2 = fs.getItem(key2);
+		assert('The First value gotten should be a real value', gotten_value1 == new_value1);
+		assert('The Second value gotten should be a real value', gotten_value2 == new_value2);
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+//Test removing a value from a cookie
+//Test removing a key/value from an empty cookie
+function testCookieStoreRemovesAPairFromAnEmptyCookie(){
+	if(cookiesEnabled()){
+
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key = 'my key';
+		try {
+			fs.removeItem(key);
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var unescaped_value = new String(unescape(readCookie(store_name)));
+		assert('No exception was thrown', exception_thrown == false);
+		assert('Cookie is empty', unescaped_value == '');
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+//Test removing a key/value from a cookie with only one key/value pair
+function testCookieStoreRemovesPairFromCookieWithOnePair(){
+	if(cookiesEnabled()){
+
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key = 'my key';
+		var value = 'my value';
+		fs.setItem(key, value);
+		var unescaped_value = new String(unescape(readCookie(store_name)));
+		assert('Cookie is not empty', unescaped_value != '');
+		try {
+			fs.removeItem(key);
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert('No exception was thrown', exception_thrown == false);
+
+		unescaped_value = new String(unescape(readCookie(store_name)));
+		assert('Cookie is empty', unescaped_value == '');
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+//Test removing a key/value pair from a cookie with more than one
+function testCookieStoreRemovesPairFromCookieWithMultiplePairs(){
+	if(cookiesEnabled()){
+
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'my first key';
+		var value1 = 'my first value';
+		var key2 = 'my second key';
+		var value2 = 'my second value';
+
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+
+		var unescaped_value = new String(unescape(readCookie(store_name)));
+		assert('Cookie is not empty', unescaped_value != '');
+		try {
+			fs.removeItem(key1);
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert('No exception was thrown', exception_thrown == false);
+		var value = fs.getItem(key1);
+		assert('The first value should be null', value == null);
+		fs.removeItem(key2);
+		assert('The second value should be null', fs.getItem(key2) == null);
+
+		unescaped_value = new String(unescape(readCookie(store_name)));
+		assert('Cookie is empty', unescaped_value == '');
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+//Test adding a pair after removing a pair
+//Test getting a pair after removing a pair
+function testCookieStoreAddsGetsAndRemovesPairs(){
+	if(cookiesEnabled()){
+
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'my first key';
+		var value1 = 'my first value';
+		var key2 = 'my second key';
+		var value2 = 'my second value';
+
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+
+		var unescaped_value = new String(unescape(readCookie(store_name)));
+		assert('Cookie is not empty', unescaped_value != '');
+		try {
+			fs.removeItem(key1);
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert('No exception was thrown', exception_thrown == false);
+		var value = fs.getItem(key1);
+		assert('The first value should be null', value == null);
+		fs.removeItem(key2);
+		assert('The second value should be null', fs.getItem(key2) == null);
+
+		unescaped_value = new String(unescape(readCookie(store_name)));
+		assert('Cookie is empty', unescaped_value == '');
+
+		var new_value1 = 'my new first value';
+		var new_value2 = 'my new second value';
+		fs.setItem(key1, new_value1);
+		fs.setItem(key2, new_value2);
+
+		assert('First value is set correctly', fs.getItem(key1) == new_value1);
+		assert('Second value is set correctly', fs.getItem(key2) == new_value2);
+
+		fs.removeItem(key1);
+		fs.removeItem(key2);
+
+		assert('First value is nulled', fs.getItem(key1) == null);
+		assert('Second value is nulled', fs.getItem(key2) == null);
+		
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+//Test removing a store
+//Test removing an empty store
+function testCookieStoreDeletesEmptyCookieStore(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert('CookieStore cookie exists',document.cookie.indexOf(store_name, 0) > -1);
+		fs.destroy();
+		assertFalse('CookieStore cookie does not exist',document.cookie.indexOf(store_name, 0) > -1);
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+
+//Test removing a store with items in it
+function testCookieStoreDeletesCookieStoreWithPairsInIt(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert('CookieStore cookie exists',document.cookie.indexOf(store_name, 0) > -1);
+		fs.setItem('key', 'value');
+		fs.setItem('key2', 'value2');
+		fs.setItem('key3', 'value3');
+		fs.destroy();
+		assertFalse('CookieStore cookie does not exist',document.cookie.indexOf(store_name, 0) > -1);
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+
+//Test creating a store after removing a previous one with the same name
+function testCookieStoreDeletesCookieAndCreatesANewOne(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert('CookieStore cookie exists',document.cookie.indexOf(store_name, 0) > -1);
+		fs.setItem('key', 'value');
+		fs.setItem('key2', 'value2');
+		fs.setItem('key3', 'value3');
+		fs.destroy();
+		assertFalse('CookieStore cookie does not exist',document.cookie.indexOf(store_name, 0) > -1);
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert('CookieStore cookie exists',document.cookie.indexOf(store_name, 0) > -1);
+	} else {
+		info("test skipped on this browser");
+	}
+}
+
+//Test getting all of the keys for a given cookie store
+function testCookieStoreGetsKeysCorrectly(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var keys = fs.getKeys();
+		assert('Should have 0 keys for an empty store', keys.length == 0);
+		fs.setItem('key', 'value');
+		fs.setItem('key2', 'value2');
+		fs.setItem('key3', 'value3');
+		keys = fs.getKeys();
+		assert('Should have 3 keys after adding three pairs', keys.length == 3);
+		assert('The three keys should be the ones we put in', keys.sort().join() == 'key,key2,key3');
+		fs.removeItem('key2');
+		keys = fs.getKeys();
+		assert('Should have 2 keys after deleting one pair', keys.length == 2);
+		assert('The two keys should still be the same', keys.sort().join() == 'key,key3');
+	} else {
+		info("testCookieStoreGetsKeysCorrectly skipped on this browser");
+	}
+}
+
+//Test getting all of the values for a given cookie store
+function testCookieStoreGetsValuesCorrectly(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var values = fs.getValues();
+		assert('Should have 0 values for an empty store', values.length == 0);
+		fs.setItem('key', 'value');
+		fs.setItem('key2', 'value2');
+		fs.setItem('key3', 'value3');
+		values = fs.getValues();
+		assert('Should have 3 values after adding three pairs', values.length == 3);
+		assert('The three values should be the ones we put in', values.sort().join() == 'value,value2,value3');
+		fs.removeItem('key2');
+		values = fs.getValues();
+		assert('Should have 2 values after deleting one pair', values.length == 2);
+		assert('The two values should still be the same', values.sort().join() == 'value,value3');
+	} else {
+		info("testCookieStoreGetsValuesCorrectly skipped on this browser");
+	}
+}
+
+//Test creating another store with the same name just gives you back that first store.
+function testCookieStoreWithSameNameReturnsSameStore(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem('key', 'value');
+		fs.setItem('key2', 'value2');
+		fs.setItem('key3', 'value3');
+		keys = fs.getKeys();
+		assert("Should have 3 keys", keys.length == 3);
+		fs = new FlexStore({storeName : store_name,
+								storeSelector : function() {return 'cookie';} });
+		var keys = fs.getKeys();
+		assert("Should have 3 keys, just like we did before", keys.length == 3);
+	} else {
+		info("testCookieStoreGetsValuesCorrectly skipped on this browser");
+	}
+}
+
+//Test putting '=' and '&' into keys and/or values for the store
+function testCookieStoreWithSeperatorCharactersInValue(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem('key', 'value&fake_key=fake_value&other_fake=more_fake');
+		var keys = fs.getKeys();
+		assert("Should only have one key, cause the value should be escaped", keys.length == 1);
+	} else {
+		info("testCookieStoreGetsValuesCorrectly skipped on this browser");
+	}
+}
+
+//Test having a cookie with the same name as the store, but an invalid value:
+//Hmm... What should it do?
+//I don't want to just overwrite it...  Unless the user explicitly says it's okay.
+//So basically, I should throw an exception unless the user has passed a 'clobber'
+// parameter
+function testCookieStoreWithBadPreviousCookieThrowsAnException(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+		createCookie(store_name, 'garbage_value', 7);
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert("Should throw an exception, since the previous cookie was bad", exception_thrown == true);
+ 	} else {
+		info("testCookieStoreGetsValuesCorrectly skipped on this browser");
+	}
+}
+
+// Don't throw the exception since we passed a parameter saying it's okay to clobber
+function testCookieStoreWithBadPreviousCookieOverwritesIfPassedClobber(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+		createCookie(store_name, 'garbage_value', 7);
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';},
+								clobberBadStore : true});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert("Should not throw an exception, since clobber=true was passed", exception_thrown == false);
+ 	} else {
+		info("testCookieStoreGetsValuesCorrectly skipped on this browser");
+	}
+}
+
+// Don't throw the exception since we passed a parameter saying it's okay to clobber
+function testMultipleCookieStoreInstancesPlayWellTogether(){
+	if(cookiesEnabled()){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		var store_name = 'my store';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';},
+								clobberBadStore : true});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem('scooby', 'doo');
+		assert("first store has correct value", fs.getItem('scooby') == 'doo');
+		var fs2 = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'cookie';},
+								clobberBadStore : true});
+		assert("first store still has correct value", fs.getItem('scooby') == 'doo');
+		assert("second store has correct value", fs2.getItem('scooby') == 'doo');
+ 	} else {
+		info("testCookieStoreGetsValuesCorrectly skipped on this browser");
+	}
+}
+
+// stolen from http://www.quirksmode.org/js/cookies.html
+function createCookie(name,value,days) {
+	if (days) {
+		var date = new Date();
+		date.setTime(date.getTime()+(days*24*60*60*1000));
+		var expires = "; expires="+date.toGMTString();
+	}
+	else var expires = "";
+	document.cookie = name+"="+value+expires+"; path=/";
+}
+
+function readCookie(name) {
+	var nameEQ = name + "=";
+	var ca = document.cookie.split(';');
+	for(var i=0;i < ca.length;i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	}
+	return null;
+}
+
+function eraseCookie(name) {
+	createCookie(name,"",-1);
+}
+
+function cookiesEnabled(){
+	var tmpcookie = new Date();
+	var cookies_enabled = false;
+	var cookie_name = 'cookiecheckcheck';
+	createCookie(cookie_name, 'checkone', 1);
+    var cookie_value = readCookie(cookie_name);
+	if(cookie_value == 'checkone'){
+		cookies_enabled = true;
+        eraseCookie(cookie_name);
+	} else {
+		cookies_enabled = false;
+	}
+	return cookies_enabled;
+}
+
+</script>
+</head>
+<body>
+<h1>FlexStore Cookie Store Tests</h1>
+</body>
+
+</html>

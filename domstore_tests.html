@@ -1,0 +1,823 @@
+<html>
+
+<head>
+<title>FlexStore DOM Store Tests</title>
+<script language="JavaScript" src="/tests/jsunit/app/jsUnitCore.js"></script>
+<script language="JavaScript" src="/js/flexstore.js"></script>
+<script language="JavaScript">
+
+var domain_to_store = 'laika.com';
+var store_name = 'my store';
+
+function setUp(){
+    // erase the DOM store, so as not to contaminate the tests.
+
+	if(window.globalStorage){
+		var storage = globalStorage[domain_to_store];
+		storage[store_name] = undefined;
+		storage.removeItem(store_name);
+		//		globalStorage.removeItem(store_name);
+	} else {
+		info("setUp skipped on this browser");
+	}
+}
+
+// function tearDown(){
+// }
+
+// Test that a DOM store with the given store-name is created.
+function testDOMStoreCreatesDOMStoreEntry(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var storage = globalStorage[domain_to_store];
+		assert("The storage should be created", storage[store_name] != null);
+	} else {
+		info("testDOMStoreCreatesDOMStoreEntry skipped on this browser");
+	}
+}
+
+// Test storing to the DOM store:
+function testDOMStoreStoresValueInDOM(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key = 'key1', value = 'value1';
+		fs.setItem(key, value);
+		var storage = globalStorage[domain_to_store];
+		var unescaped_value = new String(unescape(storage[store_name]));
+		debug("unescaped dom value: ", unescaped_value);
+		var key_value_ar = unescaped_value.split('=');
+		assert('The first return value should be the key',unescape(key_value_ar[0]) == key);
+		assert('The second return value should be the value', unescape(key_value_ar[1]) == value);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}
+}
+
+// Test storing two values
+function testDOMStoreStoresTwoValuesInDOM(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'key1', value1 = 'value1';
+		var key2 = 'key2', value2 = 'value2';
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+		var storage = globalStorage[domain_to_store];
+		var unescaped_value = new String(unescape(storage[store_name]));
+		var key_pairs_array = unescaped_value.split('&');
+		var key_value_ar1 = key_pairs_array[0].split('=');
+		var key_value_ar2 = key_pairs_array[1].split('=');
+
+		debug("unescaped dom value: ", unescaped_value);
+		var key_value_ar = unescaped_value.split('=');
+		assert('First pair key',unescape(key_value_ar1[0]) == key1);
+		assert('First pair value', unescape(key_value_ar1[1]) == value1);
+		assert('Second pair key',unescape(key_value_ar2[0]) == key2);
+		assert('Second pair value', unescape(key_value_ar2[1]) == value2);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}
+}
+
+// Test storing three values
+function testDOMStoreStoresMultipleValuesInDOM(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'key1', value1 = 'value1';
+		var key2 = 'key2', value2 = 'value2';
+		var key3 = 'key3', value3 = 'value3';
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+		fs.setItem(key3, value3);
+		var storage = globalStorage[domain_to_store];
+		var unescaped_value = new String(unescape(storage[store_name]));
+		var key_pairs_array = unescaped_value.split('&');
+		var key_value_ar1 = key_pairs_array[0].split('=');
+		var key_value_ar2 = key_pairs_array[1].split('=');
+		var key_value_ar3 = key_pairs_array[2].split('=');
+		debug("unescaped dom value: ", unescaped_value);
+		var key_value_ar = unescaped_value.split('=');
+		assert('First pair key',unescape(key_value_ar1[0]) == key1);
+		assert('First pair value', unescape(key_value_ar1[1]) == value1);
+		assert('Second pair key',unescape(key_value_ar2[0]) == key2);
+		assert('Second pair value', unescape(key_value_ar2[1]) == value2);
+		assert('Third pair key',unescape(key_value_ar3[0]) == key3);
+		assert('Third pair value', unescape(key_value_ar3[1]) == value3);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}
+}
+
+
+
+// Test overwriting key values
+function testDOMStoreStoresMultipleValuesInDOM(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'key1', value1 = 'value1';
+		var key2 = 'key2', value2 = 'value2';
+		var key3 = 'key3', value3 = 'value3';
+		var new_value1 = 'foo';
+		var new_value2 = 'bar';
+		var new_value3 = '';
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+		fs.setItem(key3, value3);
+
+		fs.setItem(key1, new_value1);
+		fs.setItem(key2, new_value2);
+		fs.setItem(key3, new_value3);
+
+		var storage = globalStorage[domain_to_store];
+		var unescaped_value = new String(unescape(storage[store_name]));
+		var key_pairs_array = unescaped_value.split('&');
+		var key_value_ar1 = key_pairs_array[0].split('=');
+		var key_value_ar2 = key_pairs_array[1].split('=');
+		var key_value_ar3 = key_pairs_array[2].split('=');
+		debug("unescaped dom value: ", unescaped_value);
+		var key_value_ar = unescaped_value.split('=');
+		assert('First pair key',unescape(key_value_ar1[0]) == key1);
+		assert('First pair value', unescape(key_value_ar1[1]) == new_value1);
+		assert('Second pair key',unescape(key_value_ar2[0]) == key2);
+		assert('Second pair value', unescape(key_value_ar2[1]) == new_value2);
+		assert('Third pair key',unescape(key_value_ar3[0]) == key3);
+		assert('Third pair value', unescape(key_value_ar3[1]) == new_value3);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}
+}
+
+// Test getting from an empty cookie
+function testDOMStoreGettingValueFromEmptyDOMStore(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key = 'my key';
+		var value = fs.getItem(key);
+		assert('The value gotten should be null', value == null);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}
+}
+
+// Test getting from cookie with one key/value pair
+function testDOMStoreGetValueFromDOMWithOnePair(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'my key';
+		var key2 = 'other key';
+		var value1 = 'my value';
+		fs.setItem(key1, value1);
+		var gotten_value1 = fs.getItem(key1);
+		var gotten_value2 = fs.getItem(key2);
+		assert('The first value gotten is correct', gotten_value1 == value1);
+		assert('The value gotten should be null', gotten_value2 == null);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}
+}
+
+//Test getting from a dom store with more than one key/value pair
+function testDOMStoreGetValueFromDOMWithMoreThanOnePair(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'my key';
+		var key2 = 'other key';
+		var key3 = 'the third key';
+		var value1 = 'my value';
+		var value2 = 'a value';
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+		var gotten_value1 = fs.getItem(key1);
+		var gotten_value2 = fs.getItem(key2);
+		var gotten_value3 = fs.getItem(key3);
+		assert('The first value gotten is correct', gotten_value1 == value1);
+		assert('The second value gotten is correct', gotten_value2 == value2);
+		assert('The value gotten should be null', gotten_value3 == null);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}
+}
+
+//Test getting from a dom store with multiple key/value pairs
+function testDOMStoreGetValueFromDOMWithMultiplePairs(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'my key';
+		var key2 = 'other key';
+		var key3 = 'the third key';
+		var value1 = 'my value';
+		var value2 = 'a value';
+		var value3 = 'another value';
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+		fs.setItem(key3, value3);
+		var gotten_value1 = fs.getItem(key1);
+		var gotten_value2 = fs.getItem(key2);
+		var gotten_value3 = fs.getItem(key3);
+		assert('The first value gotten is correct', gotten_value1 == value1);
+		assert('The second value gotten is correct', gotten_value2 == value2);
+		assert('The value gotten should be null', gotten_value3 == value3);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}
+}
+
+
+//Test getting from a dom store with changing key/value pairs
+function testDOMStoreGetValueFromDOMWithChangingValues(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'my key';
+		var key2 = 'other key';
+		var key3 = 'the third key';
+		var value1 = 'my value';
+		var value2 = 'a value';
+		var value3 = 'another value';
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+		fs.setItem(key3, value3);
+		var new_value1 = 'foo';
+		var new_value2 = 'bar';
+		var new_value3 = 'bas';
+		fs.setItem(key1, new_value1);
+		fs.setItem(key2, new_value2);
+		fs.setItem(key3, new_value3);
+		var gotten_value1 = fs.getItem(key1);
+		var gotten_value2 = fs.getItem(key2);
+		var gotten_value3 = fs.getItem(key3);
+		assert('The first value gotten is correct', gotten_value1 == new_value1);
+		assert('The second value gotten is correct', gotten_value2 == new_value2);
+		assert('The value gotten should be null', gotten_value3 == new_value3);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}
+}
+
+
+// Test removeItem
+
+//Test removing a key/value pair from an empty DOM:
+function testDOMStoreRemovesAPairFromAnEmptyDOM(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key = 'my key';
+		fs.removeItem(key);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}	
+}
+
+//Test removing a key/value pair from a DOM Store with one pair:
+function testDOMStoreRemovesAPairFromADOMStoreWithOnePair(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key = 'my key';
+		var value = 'my value';
+		fs.setItem(key, value);
+		fs.removeItem(key);
+		var gotten_value = fs.getItem(key);
+		assert("The pair was removed", gotten_value == null);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}	
+}
+
+// Test removing with more than one pair
+function testDOMStoreRemovesAPairFromADOMStoreWithMultiplePairs(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'key1', value1 = 'value1';
+		var key2 = 'key2', value2 = 'fooberry';
+		fs.setItem(key1, value1);
+		fs.setItem(key2, value2);
+		fs.removeItem(key1);
+		var gotten1 = fs.getItem(key1);
+		var gotten2 = fs.getItem(key2);
+		assert("The first value is null, since it was removed", gotten1 == null);
+		assert("The second value is still there though", gotten2 == value2);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}	
+}
+
+// Test adding after removing
+// Test removing with more than one pair
+function testDOMStoreCanAddAPairAfterRemovingIt(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		var key1 = 'key1', value1 = 'value1';
+		fs.setItem(key1, value1);
+		fs.removeItem(key1);
+		var new_value1 = 'hahahaha';
+		fs.setItem(key1, new_value1);
+		var gotten1 = fs.getItem(key1);
+		assert("The value has changed, since it was removed and readded", gotten1 == new_value1);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}	
+}
+
+// Test removing a store (empty)
+function testDOMStoreEmptyStoreCanBeRemoved(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.destroy();
+		var storage = globalStorage[domain_to_store];
+		var store_value = storage[store_name];
+		assert("DOMStore has empty value", store_value == null);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}	
+}
+
+// Test removing a store (stuff in it)
+function testDOMStoreWithPairsCanBeRemoved(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem('key1', 'value1');
+		fs.setItem('booyeah', 'yourthemannowdog');
+		fs.setItem('rayjay', 'frenchy');
+		fs.destroy();
+		var storage = globalStorage[domain_to_store];
+		var store_value = storage[store_name];
+		assert("DOMStore has empty value", store_value == null);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}	
+}
+
+// Test creating a store after removing it
+function testDOMStoreCanBeCreatedAfterBeingDestroyed(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem('key1', 'value1');
+		fs.setItem('booyeah', 'yourthemannowdog');
+		fs.setItem('rayjay', 'frenchy');
+		fs.destroy();
+		var new_fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		new_fs.setItem('key', 'value');
+		new_fs.setItem('other', 'newbie');
+		var storage = globalStorage[domain_to_store];
+		var store_value = storage[store_name];
+		assert("New DOMStore is not null", store_value != null);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}	
+}
+
+// Test getting all the keys
+function testDOMStoreReturnsTheKeys(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem('foo', 'boo');
+		fs.setItem('bar', 'car');
+		fs.setItem('bas', 'grass');
+		var keys = fs.getKeys();
+		assert("Should have 3 keys", keys.length == 3);
+		assert("The keys should be the correct ones", keys.sort().join() == 'bar,bas,foo');
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}	
+}
+
+// Test getting all the values
+function testDOMStoreReturnsTheValues(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem('foo', 'boo');
+		fs.setItem('bar', 'car');
+		fs.setItem('bas', 'grass');
+		var values = fs.getValues();
+		assert("Should have 3 values", values.length == 3);
+		assert("The values should be the correct ones", values.sort().join() == 'boo,car,grass');
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}	
+}
+
+// Test creating another store with the same name, which is just a reference to the first store
+function testDOMStoreWithSameNameReturnsSameStore(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem('joe', 'schmoe');
+		fs.setItem('billy', 'joe');
+		fs.setItem('monty', 'python');
+		var new_fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		var keys = new_fs.getKeys();
+		assert("Same store should have 3 keys", keys.length == 3);
+		assert("Keys are correct", keys.sort().join() == 'billy,joe,monty');
+		new_fs.setItem('action', 'jackson');
+		var other_fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		var value = other_fs.getItem('action');
+		assert("Should be able to use multiple flexstores to access the same store", value == 'jackson');
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}	
+}
+
+// Test putting '=' and '&' into keys and/or values for the store
+function testDOMStoreWithSeperatorCharactersInValue(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem('key', 'value&fake_key=fake_value&other_fake=more_fake');
+		fs.setItem('keyx=keyy&fruit=berger&dog', 'value');
+		var keys = fs.getKeys();
+		assert("Should only have two keys, cause the keys and values should be escaped", keys.length == 2);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}	
+}
+
+// Test having an invalid DOM storage entry with the same name
+function testDOMStoreThrowsAnExceptionIfPreviousDOMEntryIsInvalid(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+		var storage = globalStorage[domain_to_store];
+		storage[store_name] = 'foo';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert("Should throw an exception, since the previous dom entry was wrong", exception_thrown == true);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}
+}
+
+function testDOMStoreOverwritesInvalidIfClobberBadStoreIsPassed(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+		var storage = globalStorage[domain_to_store];
+		storage[store_name] = 'foo';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								clobberBadStore : true,
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert("Should throw an exception, since the previous dom entry was wrong", exception_thrown == false);
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}
+}
+
+function testMultipleDOMStoreInstancesPlayWellTogether(){
+	if(window.globalStorage){
+        var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		// for the test, all should be able to read and write,
+		// otherwise the tests will be brittle for the different
+		// hosts
+		var storage = globalStorage[domain_to_store];
+		storage[store_name] = 'foo';
+        try {
+			fs = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								clobberBadStore : true,
+								storeDomain: domain_to_store});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		fs.setItem('scooby', 'doo');
+		assert("first store has correct value", fs.getItem('scooby') == 'doo');
+		var fs2 = new FlexStore({storeName : store_name,
+			                    storeSelector : function() {return 'dom';},
+								clobberBadStore : true,
+								storeDomain: domain_to_store});
+		assert("first store still has correct value", fs.getItem('scooby') == 'doo');
+		assert("second store has correct value", fs2.getItem('scooby') == 'doo');
+	} else {
+		info("testDOMStoreStoresValueInDOM skipped on this browser");
+	}
+}
+
+</script>
+</head>
+<body>
+<h1>FlexStore DOM Store Tests</h1>
+</body>
+
+</html>

@@ -1,0 +1,318 @@
+<html>
+
+<head>
+<title>FlexStore Tests</title>
+<script language="JavaScript" src="/tests/jsunit/app/jsUnitCore.js"></script>
+<script language="JavaScript" src="/js/flexstore.js"></script>
+<script language="JavaScript">
+
+function tearDown(){
+	var store_name = 'my store';
+	eraseCookie(store_name);
+}
+
+function testFlexStoreNewNoParametersObject(){
+    var fs = null;
+
+	var exception_thrown = false;
+	var exception = null;
+    try {
+		fs = new FlexStore("foo");
+	}
+	catch(er) {
+		exception_thrown = true;
+		exception = er;
+	}
+	debug("Was an exception thrown?", exception_thrown);
+	debug("What was the exception?", exception);
+//	debug("What was the constructor?", exception.constructor);
+	debug("What is the type of the exception?", typeof exception);
+//	debug("What is the type of the constructor?", typeof exception.constructor);
+	debug("What is the type of the object?", exception.type);
+	debug("What is the message?", exception.message);
+	assert('Exception thrown when passed empty object', exception_thrown == true);
+	assert('Throws exception object', ((typeof exception == "object") ));
+	assert('Exception is of the proper class0', FlexStoreParameterError.prototype.isPrototypeOf( exception ));
+    assert('Exception is of the proper class', exception.constructor == FlexStoreParameterError);	
+    assert('Must pass an object hash as the argument.', exception.message == "Must pass an object hash as the argument.");
+}
+
+function testFlexStoreNewBadParameters(){
+    var fs = null;
+	var exception_thrown = false;
+	var exception = null;
+    try {
+		fs = new FlexStore({});
+	}
+	catch(er) {
+		exception_thrown = true;
+		exception = er;
+	}
+	assert('Exception thrown when passed bad parameters', exception_thrown == true);
+	assert('Throws exception object', ((typeof exception == "object") ));
+    assert('Exception is of the proper class', exception.constructor == FlexStoreParameterError);
+	assert('Missing storeName exception', exception.message == "Required parameter 'storeName' missing.");
+}
+
+
+function testFlexStoreNewBadStoreName(){
+    var fs = null;
+	var exception_thrown = false;
+	var exception = null;
+    try {
+		fs = new FlexStore({storeName : ''});
+	}
+	catch(er) {
+		exception_thrown = true;
+		exception = er;
+	}
+	assert('Exception thrown when passed an empty "storeName"', exception_thrown == true);
+	assert('Throws exception object', ((typeof exception == "object") ));
+    assert('Exception is of the proper class', exception.constructor == FlexStoreParameterError);
+	assert('storeName cannot be an empty string', exception.message == "'storeName' cannot be an empty string.");
+}
+
+function testFlexStoreNoStoreAvailable(){
+    var fs = null;
+	var exception_thrown = false;
+	var exception = null;
+    try {
+		fs = new FlexStore({storeName : 'my store',
+		                    storeSelector : function() {return '';} });
+	}
+	catch(er) {
+		exception_thrown = true;
+		exception = er;
+	}
+	assert('Exception thrown when no store is available', exception_thrown == true);
+	assert('Throws exception object', ((typeof exception == "object") ));
+    assert('Exception is of the proper class', exception.constructor == FlexStoreRuntimeError);
+	assert('No store available', exception.message == "No store available.");
+}
+
+function testFlexStoreDOMStoreSelected(){
+    if(window.globalStorage){
+	    var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+		try {
+			fs = new FlexStore({storeName : 'my store',
+							storeDomain : 'laika.com',
+							clobberBadStore : true,
+		                    storeSelector : function() {return 'dom';} });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		// should have a store object
+		assert('Exception is not thrown when DOM store is available', exception_thrown == false);
+		assert('FlexStore "store" is a FlexStoreDOMStore object', fs.store.constructor == FlexStoreDOMStore);
+	} else {
+		// Test skipped on this browser.
+		info("testFlexStoreSelectsDOMStore skipped on this browser");
+	}
+}
+
+function testFlexStoreCookieStoreSelected(){
+    var fs = null;
+	var exception_thrown = false;
+	var exception = null;
+    try {
+		fs = new FlexStore({storeName : 'my store',
+		                    storeSelector : function() {return 'cookie';} });
+	}
+	catch(er) {
+		exception_thrown = true;
+		exception = er;
+	}
+	// should have a store object
+	assert('Exception is not thrown when Cookie store is available', exception_thrown == false);
+    assert('FlexStore "store" is a FlexStoreCookieStore object', fs.store.constructor == FlexStoreCookieStore);
+}
+
+function testFlexStoreUserDataStoreSelected(){
+    var fs = null;
+	var exception_thrown = false;
+	var exception = null;
+    try {
+		fs = new FlexStore({storeName : 'my store',
+		                    storeSelector : function() {return 'userdata';} });
+	}
+	catch(er) {
+		exception_thrown = true;
+		exception = er;
+	}
+	// should have a store object
+	assert('Exception is not thrown when userData store is available', exception_thrown == false);
+    assert('FlexStore "store" is a FlexStoreUserDataStore object', fs.store.constructor == FlexStoreUserDataStore);
+}
+
+
+function testFlexStoreAJAXOnlySelected(){
+    var fs = null;
+	var exception_thrown = false;
+	var exception = null;
+    try {
+		fs = new FlexStore({storeName : 'my store',
+		                    storeSelector : function() {return 'ajaxonly';} });
+	}
+	catch(er) {
+		exception_thrown = true;
+		exception = er;
+	}
+	// should have a store object
+	assert('Exception is not thrown when AJAX Only store is available', exception_thrown == false);
+    assert('FlexStore "store" is a FlexStoreAJAXOnlyStore object', fs.store.constructor == FlexStoreAJAXOnlyStore);
+}
+
+function testFlexStoreSelectsDOMStore(){
+    if(window.globalStorage){
+	    var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+	    try {
+			fs = new FlexStore({storeName : 'my store',
+								clobberBadStore : true,
+								storeDomain : 'laika.com',
+			});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert('Exception is not thrown when DOM store is available', exception_thrown == false);
+		assert('FlexStore "store" is a FlexStoreDOMStore object', fs.store.constructor == FlexStoreDOMStore);
+	} else {
+		// Test skipped on this browser.
+		info("testFlexStoreSelectsDOMStore skipped on this browser");
+	}
+}
+
+function testFlexStoreSelectsCookieStore(){
+    if(cookiesEnabled()){
+		if(!(window.globalStorage)){
+		    var fs = null;
+			var exception_thrown = false;
+			var exception = null;
+			try {
+				fs = new FlexStore({storeName : 'my store'});
+			}
+			catch(er) {
+				exception_thrown = true;
+				exception = er;
+			}
+		    debug("exception is", exception);
+			assert('Exception is not thrown when cookie store is available', exception_thrown == false);
+		}
+		if(window.globalStorage){
+			info("DOM store is enabled, so cookie store was not selected");
+		} else if(userDataAvailable()) {
+			info("UserData store is enabled, so cookie store was not selected");
+		} else {
+		    assert('FlexStore "store" is a FlexStoreCookieStore object', fs.store.constructor == FlexStoreCookieStore);
+		}
+	} else {
+		info("testFlexStoreSelectsCookieStore skipped on this browser");
+	}
+}
+
+function testFlexStoreSelectsUserDataStore(){
+	if(userDataAvailable()){
+	    var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+	    try {
+			fs = new FlexStore({storeName : 'my store'});
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert('Exception is not thrown when userData store is available', exception_thrown == false);
+		debug("The store constructor is: ", fs.store.constructor);
+		assert('FlexStore "store" is a FlexStoreUserDataStore object', fs.store.constructor == FlexStoreUserDataStore);
+	} else {
+		info("testFlexStoreSelectsUserDataStore skipped on this browser");
+	}
+}
+
+function testFlexStoreSelectsAJAXOnlyStore(){
+	// if userData, DOM and cookies are not available:
+	// but the user has specified a back-end data store:
+	if(window.globalStorage || userDataAvailable() || cookiesEnabled()){
+		info("testFlexStoreSelectsAJAXOnlyStore skipped on this browser");
+	} else {
+	    var fs = null;
+		var exception_thrown = false;
+		var exception = null;
+	    try {
+			fs = new FlexStore({storeName : 'my store',
+			                    AJAXStoreURL : 'http://test.cim/services/backendstore/store',
+								AJAXGetURL   : 'http://test.cim/services/backendstore/get',
+								AJAXRemoveURL: 'http://test.cim/services/backendstore/remove'
+			                    });
+		}
+		catch(er) {
+			exception_thrown = true;
+			exception = er;
+		}
+		assert('Exception is not thrown when ajax only store is available', exception_thrown == false);
+		assert('FlexStore "store" is a FlexStoreAJAXOnlyStore object', fs.store.constructor == FlexStoreAJAXOnlyStore);	
+	}
+}
+function cookiesEnabled(){
+	var tmpcookie = new Date();
+	var cookies_enabled = false;
+	var cookie_name = 'cookiecheckcheck';
+	createCookie(cookie_name, 'checkone', 1);
+    var cookie_value = readCookie(cookie_name);
+	if(cookie_value == 'checkone'){
+		cookies_enabled = true;
+        eraseCookie(cookie_name);
+	} else {
+		cookies_enabled = false;
+	}
+	return cookies_enabled;
+}
+// stolen from http://www.quirksmode.org/js/cookies.html
+function createCookie(name,value,days) {
+	if (days) {
+		var date = new Date();
+		date.setTime(date.getTime()+(days*24*60*60*1000));
+		var expires = "; expires="+date.toGMTString();
+	}
+	else var expires = "";
+	document.cookie = name+"="+value+expires+"; path=/";
+}
+
+function readCookie(name) {
+	var nameEQ = name + "=";
+	var ca = document.cookie.split(';');
+	for(var i=0;i < ca.length;i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	}
+	return null;
+}
+
+function eraseCookie(name) {
+	createCookie(name,"",-1);
+}
+
+function userDataAvailable(){
+	var userData_enabled = false;
+	if(document.all && window.ActiveXObject){
+		userData_enabled = true;
+	}
+	return userData_enabled;
+}
+
+</script>
+</head>
+<body>
+<h1>FlexStore Tests</h1>
+</body>
+
+</html>
